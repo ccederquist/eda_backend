@@ -49,7 +49,7 @@ async def fire_redis_event(websocket):
 
 
 async def stuff_doer(websocket, user, data):
-    redis_obj = redis.Redis()
+    redis_obj = redis.Redis(host='172.31.81.236', port=6379)
     pubsub = redis_obj.pubsub()
     await pubsub.psubscribe(user)
     await redis_obj.publish('ssm-channel', str({"user": user, "num": data.split(" ")[-1]}))

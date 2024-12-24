@@ -32,14 +32,6 @@ FORMATTER = Formatter("%(asctime)s : %(threadName)s : %(levelname)s : %(message)
 # create logs folder if not already present
 if 'logs' not in listdir():
     mkdir('logs')
-# create log file if not already present
-LOG_FILE = "logs/orchestrator_logs.log"
-try:
-    with open(LOG_FILE, "w"):
-        pass
-    print(f"Empty file '{LOG_FILE}' has been created.")
-except IOError as e:
-    print(f"Error creating file: {e}")
 
 
 def get_console_handler():
@@ -56,7 +48,7 @@ def get_console_handler():
     return console_handler
 
 
-def get_file_handler():
+def get_file_handler(filename):
     """
     Creates and returns a FileHandler that stores logs in a log file.
     uses TimedRotatingFileHandler, which wipes logs every midnight.
@@ -66,6 +58,14 @@ def get_file_handler():
     file_handler: TimedRotatingFileHandler
         handler for storing logs in log file
     """
+        # create log file if not already present
+    LOG_FILE = f"logs/{filename}.log"
+    try:
+        with open(LOG_FILE, "w"):
+            pass
+        print(f"Empty file '{LOG_FILE}' has been created.")
+    except IOError as e:
+        print(f"Error creating file: {e}")
     file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight', backupCount=3)
     file_handler.setFormatter(FORMATTER)
     return file_handler
@@ -93,7 +93,7 @@ def create_logger(logger_name, log_level):
     logger = getLogger(logger_name)
     logger.setLevel(log_level)
     queue_handler = QueueHandler(queue)
-    listener = QueueListener(queue, get_console_handler(), get_file_handler())
+    listener = QueueListener(queue, get_console_handler(), get_file_handler(logger_name))
     logger.addHandler(queue_handler)
     logger.propagate = False
     return logger, listener
